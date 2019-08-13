@@ -1,0 +1,92 @@
+{{extend '../_layouts/home.html'}}
+
+{{block 'title'}}{{'多人博客 - 首页'}}{{/block}}
+
+{{block 'body'}}
+<section class="container">
+  {{include '../_partials/settings-nav.html'}}
+  <div class="col-md-5">
+    <div class="subhead">
+      <h2>修改密码</h2>
+    </div>
+    <hr>
+    <form id="made-password">
+      <div class="form-group">
+        <label for="">当前密码</label>
+        <input type="password" class="form-control" name="old_password" placeholder="">
+      </div>
+      <div class="form-group">
+        <label for="">新的密码</label>
+        <input type="password" class="form-control" name="new_password" placeholder="">
+      </div>
+      <div class="form-group">
+        <label for="e">确认密码</label>
+        <input type="password" class="form-control" name="neww_password" placeholder="">
+      </div>
+      <button type="submit" class="btn btn-success btn-lg btn-block">保存</button>
+    </form>
+    <div class="subhead">
+      <h2>注销账号</h2>
+      <hr>
+    </div>
+    <div>
+      <p>一旦注销，不可找回，请谨慎操作</p>
+      <a class="btn btn-danger btn-lg btn-block" id="del-user">注销</a>
+    </div>
+    <hr>
+  </div>
+</section>
+{{/block}}
+
+{{block 'script'}}
+<script src="/public/js/bootbox.min.js"></script>
+<script>
+  $('#made-password').on('submit', function (e) {
+    e.preventDefault();
+    var formData = $(this).serialize();
+    $.ajax({
+      url: '/settings/admin',
+      type: 'post',
+      data: formData,
+      dataType: 'json',
+      success: function (data) {
+        var err_code = data.err_code;
+
+        if (err_code === 0) {
+          window.alert('账号已过期，请重新登录!');
+          window.location.href = '/login';
+        } else if (err_code === 1) {
+          window.alert('当前密码输入不正确，请重新输入!')
+        } else {
+          window.alert('两处新密码输入不相等，请重试输入!')
+        }
+      }
+    })
+  })
+
+  $('#del-user').click(function (e) {
+    bootbox.confirm({
+      size: "small",
+      message: "确认删除",
+      callback: function (result) {
+        if(result) {
+          $.ajax({
+            url: '/settings/del',
+            type: 'get',
+            dataType: 'json',
+            success: function (data) {
+              var err_code = data.err_code;
+
+              if (err_code === 0) {
+                window.location.href = '/';
+              } else {
+                bootbox.alert('服务器正忙，请稍后重试!');
+              }
+            }
+          })
+        }
+      }
+    })
+  })
+</script>
+{{/block}}
